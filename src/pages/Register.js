@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 
@@ -54,7 +55,24 @@ const Register = () => {
     setErrorMsg(validationMsg);
 
     if (!validationMsg){
-      navigate("/login");
+      axios.post(`http://localhost:5001/auth/register`, userInfo, {
+        'Content-Type': 'application/json'
+      })
+      .then(response => {
+        const res = response?.data;
+        if (res && res.successful){
+          navigate("/login", {state: {message: res.message}});
+        } else {
+          setErrorMsg(res.message || "Error occurred when creating user!");
+        }
+      }).catch(err => {
+        const res = err?.response?.data;
+        if (res && res.message){
+          setErrorMsg(res.message);
+        } else {
+          setErrorMsg("Error occurred when creating user!");
+        }
+      })
     }
   }
 
@@ -79,7 +97,7 @@ const Register = () => {
               <h2 className="fw-700 display1-size display2-md-size mb-4">Create <br />your account</h2>
               {
                 errorMsg && (
-                  <div className="bg-red text-white font-xsss p-3 mb-3 rounded"> <i className="ti-face-sad"></i> {errorMsg}</div>
+                  <div className="bg-danger text-white font-xsss p-3 mb-3 rounded"> <i className="ti-face-sad"></i> {errorMsg}</div>
                 )
               }
               <form onSubmit={handleSubmit}>

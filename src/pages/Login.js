@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const userLoginInfo = {
   "email": "",
@@ -8,10 +9,12 @@ const userLoginInfo = {
 
 const Login = () => {
 
-  const [userInfo, setUserInfo] = useState(userLoginInfo);
-
-  const [errorMsg, setErrorMsg] = useState(null);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const [userInfo, setUserInfo] = useState(userLoginInfo);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [message, setMessage] = useState(location?.state?.message);
 
   const handleChange = (e) => {
     setUserInfo({...userInfo, [e.target.name]:e.target.value});
@@ -44,12 +47,21 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+    setMessage(null);
     const validationMsg = checkValidation();
     setErrorMsg(validationMsg);
 
     if (!validationMsg){
-      navigate("/");
+      axios.post(`http://localhost:5001/token`, userInfo, {
+        'Content-Type': 'application/json'
+      })
+      .then(response => {
+        const token = JSON.stringify(response?.data?.token);
+        localStorage.setItem("token", token);
+        navigate("/");
+      }).catch(err => {
+        setErrorMsg(err?.response?.data);
+      })
     }
   }
 
@@ -73,7 +85,12 @@ const Login = () => {
               <h2 className="fw-700 display1-size display2-md-size mb-3">Login into <br />your account</h2>
               {
                 errorMsg && (
-                  <div className="bg-red text-white font-xsss p-3 mb-3 rounded"> <i className="ti-face-sad"></i> {errorMsg}</div>
+                  <div className="bg-danger text-white font-xsss p-3 mb-3 rounded"> <i className="ti-face-sad"></i> {errorMsg}</div>
+                )
+              }
+              {
+                message && (
+                  <div className="bg-success text-white font-xsss p-3 mb-3 rounded"> <i className="ti-face-sad"></i> {message}</div>
                 )
               }
               <form onSubmit={handleSubmit}>
