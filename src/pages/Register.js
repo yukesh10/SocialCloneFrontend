@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import jwt_decode from 'jwt-decode';
 
 const userRegisterInfo = {
   "name": "",
@@ -15,6 +16,18 @@ const Register = () => {
   const [errorMsg, setErrorMsg] = useState(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+  
+    if (token){
+      const decodedToken = jwt_decode(token);
+      const currentDate = new Date();
+      if (decodedToken.exp * 1000 >= currentDate.getTime()){
+        navigate('/');
+      } 
+    } 
+  }, [navigate]);
 
   const handleChange = (e) => {
     setUserInfo({...userInfo, [e.target.name]:e.target.value});
@@ -80,7 +93,7 @@ const Register = () => {
     <div className="main-wrap color-theme-blue">
       <div className="nav-header bg-transparent shadow-none border-0">
         <div className="nav-top w-100">
-          <a href="/"><i className="feather-zap text-success display1-size me-2 ms-0"></i><span className="d-inline-block fredoka-font ls-3 fw-600 text-current font-xxl logo-text mb-0">:Social:Clone:</span> </a>
+          <a href="/"><i className="feather-zap text-success display1-size me-2 ms-0"></i><span className="d-inline-block fredoka-font ls-3 fw-600 text-current font-xxl logo-text mb-0">:Social:</span> </a>
           <button className="nav-menu me-0 ms-auto"></button>
 
           <a href="/login" className="header-btn d-none d-lg-block bg-dark fw-500 text-white font-xsss p-3 ms-auto w100 text-center lh-20 rounded-xl">Login</a>
