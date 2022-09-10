@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
+import axios from 'axios';
 
 import Header from '../components/Header';
 import Createpost from '../components/Createpost';
@@ -8,6 +9,16 @@ import Postview from '../components/Postview';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
+
+  const getPosts = () => {
+    axios.get(`http://localhost:5001/post/getAll`)
+      .then(response => {
+        console.log(response);
+      }).catch(err => {
+        console.log(err);
+      })
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -18,6 +29,9 @@ const Home = () => {
       if (decodedToken.exp * 1000 < currentDate.getTime()){
         navigate('/login', {state: {message: "User Logged Out"}});
       } 
+
+      getPosts();
+
     } else {
       navigate('/login', {state: {message: "User Not Logged In"}});
     }
